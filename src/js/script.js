@@ -22,7 +22,7 @@ async function loginUser(userData) {
             }, 5000);
             return;
         }
-        window.location.replace(window.location.href.substr(0, (window.location.href.lastIndexOf("/"))) + "/landing.html?auth=" + userAuth);
+        window.location.replace(window.location.href.substr(0, (window.location.href.lastIndexOf("/"))) + "/index.html?auth=" + userAuth);
     }
     catch (err) {
         console.log(err);
@@ -44,12 +44,13 @@ $(window).on('load', function() {
 });
 
 function loadDashboard(authKey) {
-    console.log(userAuth)
     if (authKey === 'admin') {
         $('[data-auth=admin]').show();
     } else {
         $('[data-auth=admin]').hide();
     } 
+
+    loadQuizzes();
 }
 
 $('.login-btn').on('click', function() {
@@ -67,7 +68,7 @@ $('.login-btn').on('click', function() {
 });
 
 $('.logout').on('click', function() {
-    window.location.replace(window.location.href.substr(0, (window.location.href.lastIndexOf("/"))) + "/index.html");
+    window.location.replace(window.location.href.substr(0, (window.location.href.lastIndexOf("/"))) + "/login.html");
 });
 
 /*Add users*/
@@ -80,7 +81,6 @@ async function registerUser(userData) {
             headers: {'Content-Type': 'application/json'}
         });
         const data = await response.json();
-        console.log(data);
 
         $('.user-mng-overlay').fadeIn();
     }
@@ -110,15 +110,162 @@ $('#add-user').on('click', function() {
     });
 });
 
-$('.user-mng-overlay button').on('click', function() {
+$('.close').on('click', function() {
     $(this).parent().fadeOut();
+
+    if ($(this).parent().hasClass('quiz-save-overlay')) {
+        $('.edit-quiz-page').hide();
+        $('.dashboard').show();
+        loadQuizzes();
+    }
 });
 
 /*Quizzes functionality*/ 
 
-function loadQuizzes() {
-    //if basic auth, add class to open buttons
+async function loadQuizzes() {
+    $('.quiz-grid').empty();
+
+    try {
+        const response = await fetch('http://localhost:5000/quiz/getQuizzes')
+        const data = await response.json();
+        console.log(data);
+
+        for (let i = 0; i < data.length; i++) {
+            let quizTile = document.createElement('div');
+            $(quizTile).attr({'data-id': data[i]._id, 'class':'quiz-tile column'});
+            let titleSpan = document.createElement('span');
+            titleSpan.classList = 'tile-info';
+            $(titleSpan).text(data[i].title);
+            let buttonDiv = document.createElement('div');
+            buttonDiv.classList = 'tile-buttons';
+            let openButton = document.createElement('button');
+            openButton.classList = 'open-quiz';
+            $(openButton).text('open');
+
+            if (userAuth == 'admin') {
+                $(quizTile).attr('data-info', JSON.stringify(data[i].questions));
+                let editButton = document.createElement('button');
+                editButton.classList = 'edit-quiz';
+                $(editButton).text('edit');
+                let deleteButton = document.createElement('button');
+                deleteButton.classList = 'delete-quiz';
+                $(deleteButton).text('delete');
+                buttonDiv.append(editButton, openButton, deleteButton);
+            } else if (userAuth == 'assistant') {
+                $(quizTile).attr('data-info', JSON.stringify(data[i].questions));
+                buttonDiv.append(openButton);
+            } else {
+                openButton.classList = 'student-open';
+                buttonDiv.append(openButton);
+            }
+            
+            quizTile.append(titleSpan, buttonDiv);
+            $('.quiz-grid').append(quizTile);
+        }
+    }
+    catch (err) {
+        console.log('Get quizzes error:' + err)
+    }
 }
+
+$(document).on('click', '.open-quiz', function() {
+    if ($(this).hasClass('.student-open')) {
+        console.log('student opening')
+    } else {
+        let quizData = $(this).parent().parent().attr('data-info');
+        
+
+        console.log(quizData);
+    }
+});
+
+$('.reload').on('click', function() {
+    loadQuizzes();
+});
+
+async function deleteQuiz(quizId) {
+    let id = {quizId}
+
+    try {
+        const response = await fetch('http://localhost:5000/quiz/deleteQuiz', {
+            method: 'post',
+            body: JSON.stringify(id),
+            headers: {'Content-Type': 'application/json'}
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        //loadQuizzes();
+    }
+    catch (err) {
+        console.log('delete quiz error:' + err); // this is still erroring for some reason but is working? come back to
+    }
+
+    loadQuizzes();
+}
+
+$(document).on('click', '.delete-quiz', function() {
+    let quizId = $(this).parent().parent().attr('data-id');
+
+    deleteQuiz(quizId);
+});
+
+async function saveQuiz(quizData) {
+    try {
+        const response = await fetch('http://localhost:5000/quiz/saveQuiz', {
+            method: 'post',
+            body: JSON.stringify(quizData),
+            headers: {'Content-Type': 'application/json'}
+        });
+        const data = await response.json();
+        
+        $('.quiz-save-overlay').show();
+    }
+    catch (err) {
+        console.log('save quiz error: ' + err);
+    }
+}
+
+$('#save-quiz').on('click', function() {
+    let i = 1;  
+    var fullQuiz = {};
+    let quizTitle = $('#quiz-title').val();
+    var questionList = [];
+
+    $('.question').each(function() {
+        var questionMap = {};
+        let optionsList = [];
+        let qNumber = i++;
+        let quizQuestion = $('#q-' + qNumber).val();
+
+        var optionA = $('#' + qNumber + '-a').val();
+        var optionB = $('#' + qNumber + '-b').val();
+        var optionC = $('#' + qNumber + '-c').val();
+        var optionD = $('#' + qNumber + '-d').val();
+        if (optionA !== undefined) {
+            optionsList.push(optionA);
+        }
+        if (optionB !== undefined) {
+            optionsList.push(optionB);
+        }
+        if (optionC !== undefined) {
+            optionsList.push(optionC);
+        }
+        if (optionD !== undefined) {
+            optionsList.push(optionD);
+        }
+
+        
+        questionMap['question'] = quizQuestion;
+        questionMap['options'] = optionsList;
+        questionList.push(questionMap);
+    });
+
+    fullQuiz['title'] = quizTitle;
+    fullQuiz['questions'] = questionList;
+    saveQuiz(fullQuiz);
+});
 
 $('.add-new').on('click', function() {
     $('.dashboard').hide();
@@ -147,13 +294,12 @@ $(document).on('click', '.add-option', function() {
     
     if (options == 2) {
         letter = 'c';
+        $(optionsDiv).parent().children('.divider, .remove-option').show();
     } else if (options == 3) {
         letter = 'd';
-        $(optionsDiv).parent().children('.add-option').hide();
-        //$(optionsDiv).parent().children('.add-option').text('remove option'); //fix this later - not crucial
+        $(optionsDiv).parent().children('.divider, .add-option').hide();
     } else if (options > 3) {
-        //$(optionsDiv).children().last().remove();
-        //$(optionsDiv).parent().children('.add-option').text('+ add option');
+        $(optionsDiv).parent().children('.divider, .remove-option').show();
         return;
     } else {
         alert('Quiz questions must have at least 2 answers'); //add feedback for users for 2 answers min
@@ -169,6 +315,26 @@ $(document).on('click', '.add-option', function() {
     $(answerInput).attr({'type':'text', 'class':'quiz-input answer-input', 'name':number + '-' + letter, 'id': number + '-' + letter});
     $(answerWrap).append(answerLabel, answerInput);
     $('.quiz-answers-' + number).append(answerWrap);
+});
+
+$('.remove-option').on('click', function() {
+    let number = $(this).parent().attr('data-number');
+    let optionsDiv = $(this).parent().children('.quiz-answers-' + number);
+    let options = $(optionsDiv).children().length;
+    
+    console.log(options)
+
+    if (options == 3) {
+        $(optionsDiv).parent().children('.add-option').show();
+        $(optionsDiv).parent().children('.divider, .remove-option').hide();
+    } else if (options == 4) {
+        $(optionsDiv).parent().children('.divider, .add-option').show();
+        $(optionsDiv).parent().children('.remove-option').show();
+    } else {
+        return;
+    }
+
+    $(optionsDiv).children().last().remove();
 });
 
 $('.add-question').on('click', function() {
@@ -214,7 +380,6 @@ $('.add-question').on('click', function() {
     $('.quiz-questions').append(questionWrap);
 });
 
-
 /*For assistant view*/
 $('.print-info button').on('click', function() {
    $(this).parent().fadeOut(); 
@@ -223,11 +388,12 @@ $('.print-info button').on('click', function() {
 /*For user management*/
 $('.mng-users').on('click', function() {
     $('.dashboard').hide();
+    $('.content-page').hide();    
     $('.user-mng-page').show();
 });
 
 $('.to-dash').on('click', function() {
-    $('.user-mng-page').hide();
+    $('.content-page').hide();
     $('.dashboard').show();
 });
 

@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Quizbox</title>
+
+        <style>
+			:root {
+				--background-light: #FFFFFF;
+				--color-main: #127475;
+				--color-hover: #F2542D; 
+			}
+		</style> 
+        
+        <meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+		<link rel="apple-touch-icon" sizes="180x180" href="img/WS-logo-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="img/WS-logo-icon.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="img/WS-logo-icon.png">
+
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+
+	    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    </head>
+    <body>
+        <div class="login-page column">
+            <img alt="Webbiskools logo" src="img/WS-logo-large.png">
+            <div class="login-box column">
+                <h3>Login to Quizbox</h3>
+                <label for="QB-username">username</label>
+                <input type="text" name="QB-username" id="qb-username" />
+                <br>
+                <label for="QB-password">password</label>
+                <input type="password" name="QB-password" id="qb-password" />
+                <br>
+                <span class="login-error"></span>
+                <br>
+                <button class="login-btn">Login</button>
+            </div>
+        </div>
+        <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+        
+        <script src="js/script.js"></script>
+    </body>
+</html>

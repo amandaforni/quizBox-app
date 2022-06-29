@@ -12,7 +12,7 @@ router.post("/register", async (req, res) => {
     if (error) return res.status(400).send(error.details[0].message);
     //Check if the user is already in the db
 
-    const usernameExists = await User.findOne({ username: req.body.username }); //this is timing out
+    const usernameExists = await User.findOne({ username: req.body.username });
 
     if (usernameExists) return res.status(400).send("User already exists");
 
@@ -40,16 +40,16 @@ router.post("/login", async (req, res) => {
     if (error) return res.status(400).send(JSON.stringify(error.details[0].message));
 
     const user = await User.findOne({ username: req.body.username });
-  
+
     if (!user) return res.status(400).send(JSON.stringify("Username or password is wrong"));
-  
+
     const validPass = await bcrypt.compare(req.body.password, user.password);
     if (!validPass) return res.status(400).send(JSON.stringify("Username or password is wrong"));
-  
+
     const auth = user.auth;
     //Create and assign a token
     const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
-    res.send({token: token, auth: auth});
+    res.send({ token: token, auth: auth });
 });
 
 //joi used to validate data

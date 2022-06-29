@@ -3,6 +3,14 @@
     <head>
         <title>Quizbox</title>
         
+        <style>
+			:root {
+				--background-light: #FFFFFF;
+				--color-main: #127475;
+				--color-hover: #F2542D; 
+			}
+		</style> 
+        
         <meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		
@@ -14,25 +22,128 @@
 		<link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+        
+		<link rel="stylesheet" type="text/css" href="css/main.css" />
 
-	    <link rel="stylesheet" type="text/css" href="css/main.css" />
     </head>
     <body>
-        <div class="login-page column">
-            <img alt="Webbiskools logo" src="img/WS-logo-large.png">
-            <div class="login-box column">
-                <h3>Login to Quizbox</h3>
-                <label for="QB-username">username</label>
-                <input type="text" name="QB-username" id="qb-username" />
-                <br>
-                <label for="QB-password">password</label>
-                <input type="password" name="QB-password" id="qb-password" />
-                <br>
-                <span class="login-error"></span>
-                <br>
-                <button class="login-btn">Login</button>
+        <div class="menu-top">
+            <button class="home to-dash">home</button>
+            <button class="mng-users" data-auth="admin" style="display:none">manage users</button>
+            <button class="logout">log out</button>
+        </div>
+        <div class="dashboard">
+            <h2>Quizbox Dashboard</h2>
+            <div class="dashboard-content" >
+                <button class="add-new" data-auth="admin">Add new quiz</button>
+                <button class="reload">Reload quizzes</button>
+                <div class="quiz-grid">
+
+                </div>
             </div>
         </div>
+        
+        <div class="edit-quiz-page content-page" style="display: none;">
+            <div class="quiz-editor">
+                <h2>Add a new quiz</h2>
+                <div class="title-row">
+                    <h3>Quiz title: </h3>
+                    <input type="text" name="quiz-title" class="quiz-input" id="quiz-title" />
+                </div>
+                <div class="quiz-questions">
+                    <div class="question" data-number="1">
+                        <label for="q-1">1.</label>
+                        <input type="text" class="quiz-input question-input"  name="q-1" id="q-1" />
+                        
+                        <div class="answers-list" data-number="1">
+                            <div class="quiz-answers-1">
+                                <div class="option">
+                                    <label for="1-a">a.</label>
+                                    <input type="text" class="quiz-input answer-input"  name="1-a" id="1-a" /> 
+                                </div>
+                                
+                                <div class="option">
+                                    <label for="1-b">b.</label>
+                                    <input type="text" class="quiz-input answer-input"  name="1-b" id="1-b" />
+                                </div>
+                            </div>
+                            
+                            <a class="add-option">+ add another answer</a>
+                            <span class="divider" style="display: none;"> | </span>
+                            <a class="remove-option" style="display: none;">delete last answer</a>
+                        </div>
+                    </div>
+                </div>
+                <button class="add-question">+ add another question</button>
+                <div class="quiz-actions column">
+                    <button id="save-quiz">Save quiz</button>
+                    <br>
+                    <a class="cancel">Cancel</a>
+                </div>
+            </div>
+        </div>
+        <div class="quiz-save-overlay overlay content-page" style="display: none;">
+            <p>Quiz saved successfully!</p>
+            <button class="close">Okay</button>
+        </div>
+        <div class="confirm-overlay overlay" style="display: none;">
+            <p>Return to dashboard and lose all progress?</p>
+            <button class="yes-cancel">Return to dashboard</button>
+            <button class="no-cancel">Stay on this page</button>
+        </div>
+        
+        <div class="quiz-assistant-preview" style="display: none;">
+            <div class="print-info">
+                <p>Please print using browser</p>
+                <button class="close">Okay</button>
+            </div>
+            
+            <div class="title-row">
+                <label for="print-name">Name: </label>
+                <input type="text" class="print-line"  name="print-name" /> 
+                <label for="print-date">Date: </label>
+                <input type="text" class="print-line"  name="print-date" /> 
+            </div>
+            <div class="print-questions">
+                
+            </div>
+        </div>
+        <div class="quiz-student-preview content-page" style="display: none;">
+            <h2>Welcome to the study zone!</h2>
+            <h3 class="student-quiz-name"></h3>
+            <div class="quiz-q-preview">
+                
+            </div>
+        </div>
+        
+        <div class="user-mng-page content-page" style="display: none;">
+            <div class="new-user-form column">
+                <h3>Add a new user to Quizbox</h3>
+                <input type="text" id="username" placeholder="username" />
+                <br>
+                <input type="password" id="password" placeholder="password" />
+                <br>
+                <p>Select permission level:</p>
+                <div class="title-row">
+                    <input type="radio" id="admin" name="auth-level" value="admin">
+                    <label for="admin">Admin</label>
+                    <input type="radio" id="assistant" name="auth-level" value="assistant">
+                    <label for="assistant">Assistant</label>
+                    <input type="radio" id="student" name="auth-level" value="student" checked>
+                    <label for="student">Student</label>
+                </div>
+                <span class="add-user-error"></span>
+                <br>
+                <button id="add-user">Save user</button>
+                <br>
+                <a class="to-dash">Cancel</a>
+            </div>
+        </div>
+        <div class="user-mng-overlay overlay content-page" style="display: none;">
+            <p>User saved successfully!</p>
+            <button class="close">Okay</button>
+        </div>
+        
         <script src="https://code.jquery.com/jquery-latest.min.js"></script>
         
         <script src="js/script.js"></script>

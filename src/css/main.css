@@ -1,19 +1,24 @@
 /*Shared styles*/
 
 body {
-    background-color: #003D5B;
+    background-color: var(--color-main);
     font-family: roboto, sans-serif;
 }
 
 input {
-    margin-top: 2px;
+    margin-top: 8px;
     padding: 3px;
     border-radius: 6px;
+    border: 1px solid var(--color-main);
+}
+
+h2 {
+    float: center;
 }
 
 button {
-    background-color: #003D5B;
-    color: #ffffff;
+    background-color: var(--color-main);
+    color: var(--background-light);
     width: 10rem;
     height: 2.4rem;
     border: none;
@@ -23,22 +28,38 @@ button {
 
 button:hover {
     cursor: pointer;
-    background-color: #CBA1F7;
+    background-color: var(--color-hover);
 }
 
 a:hover {
     cursor: pointer;
-    color: #CBA1F7;
+    color: var(--color-hover);
+}
+
+body::-webkit-scrollbar {
+    width: 0.3em;
+    background-color: var(--background-light)
+}
+
+body::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+body::-webkit-scrollbar-thumb {
+    background-color: rgba(18, 116, 117, 0.3);
+    outline: 1px solid var(--background-light);
+    width: 0.2em;
+    border-radius: 12px;
 }
 
 .overlay {
     position: fixed;
-    background: #ffffff;
+    background: var(--background-light);
     border-radius: 5px;
     padding: 1rem;
     z-index: 2;
-    color: #003D5B;
-    box-shadow: 0 0 5px 1px #003d5b;
+    color: var(--color-main);
+    box-shadow: 0 0 5px 1px var(--color-main);
     top: 50%;
     left: 50%;
     bottom: auto;
@@ -55,13 +76,18 @@ a:hover {
 .title-row {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: baseline;
+    justify-content: center;
     margin-bottom: 2rem;
+}
+
+[type=radio]:hover {
+    cursor: pointer;
 }
 
 /*Login page styles*/
 .login-page {
-    margin-top: 9%;
+    margin-top: 6%;
 }
 
 .login-page img {
@@ -71,8 +97,8 @@ a:hover {
 }
 
 .login-box {
-    background-color: #FFFFFF;
-    color: #003D5B;
+    background-color: var(--background-light);
+    color: var(--color-main);
     width: 22rem;
     padding: 2rem;
     border-radius: 18px;
@@ -90,30 +116,63 @@ a:hover {
 /*App styles*/
 
 body {
-    color: #ffffff;
+    color: var(--background-light);
     padding: 2rem;
 }
 
 .menu-top {
     position: fixed;
-    top: 1rem;
-    right: 1rem;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
 }
 
-/*Manage users*/
-.new-user-form {
-    height: 15rem;
+.menu-top button {
+    width: 8rem;
+    border-radius: 0px;
+    float: right;
+    border-bottom: 1px solid var(--background-light);
+}
+
+.home {
+    border-left: 1px solid var(--background-light);
+}
+
+.mng-users {
+    border-left: 1px solid var(--background-light);
+    border-right: 1px solid var(--background-light);
+}
+
+.new-user-form, .quiz-editor {
+    margin-top: 4%;
+}
+
+.new-user-form input:not([type=radio]) {
+    width: 14rem;
 }
 
 /*Dashboard*/
 
+.dashboard, .quiz-editor {
+    text-align: center;
+}
+
 .dashboard-content, .quiz-editor, .new-user-form {
-    background-color: #ffffff;
-    color: #003D5B;
+    background-color: var(--background-light);
+    color: var(--color-main);
     padding: 1rem;
+    min-height: 33rem;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .add-new {
+    float: right;
+}
+
+.reload { /*Remove when removing this button after testing*/
     float: right;
 }
 
@@ -133,18 +192,22 @@ body {
 }
 
 .quiz-tile:hover {
-    border: 1px solid #D9BBF9;
+    border: 1px solid var(--color-hover);
     border-radius: 9px;
 }
 
 .tile-info {
     height: 6rem;
     width: 11rem;
-    border: 1px solid #003D5B;
+    border: 1px solid var(--color-main);
     border-radius: 9px;
     padding: 0.8rem;
     margin-bottom: 1rem;
     overflow: hidden; /*Set some sort of hover effect for this to show whole title if overflowed*/
+}
+
+.tile-buttons button {
+    margin: 4px;
 }
 
 .quiz-tile button {
@@ -153,13 +216,15 @@ body {
 
 .question {
     min-height: 8rem;
-    margin-top: 2rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }
 
 .quiz-input {
     margin-left: 1rem;
     width: 32rem;
     padding: 6px;
+    margin-bottom: 8px;
 }
 
 .quiz-answers div, .quiz-answers, .add-question {
@@ -170,12 +235,17 @@ body {
     margin-bottom: 1rem;
 }
 
-.answers-list, .add-option {
-    margin-left: 2rem;
+.question label {
+    font-weight: bold;
+}
+
+.question:hover {
+    background-color:rgba(18, 116, 117, 0.3);
 }
 
 #quiz-title {
-    width: 30rem;
+    width: 34rem;
+    margin-right: 2rem;
 }
 
 .question-input {
@@ -184,5 +254,13 @@ body {
 
 .add-question {
     width: 12rem;
+}
+
+.quiz-actions {
+    justify-content: flex-end;
+}
+
+#save-quiz {
+    margin-top: 3rem;
 }
 
