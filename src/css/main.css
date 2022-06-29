@@ -61,7 +61,7 @@ a:hover {
 
 /*Login page styles*/
 .login-page {
-    margin-top: 12%;
+    margin-top: 9%;
 }
 
 .login-page img {
@@ -81,6 +81,10 @@ a:hover {
 
 .login-box input {
     width: 16rem;
+}
+
+.login-error, .add-user-error {
+    color: red;
 }
 
 /*App styles*/

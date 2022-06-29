@@ -14,8 +14,12 @@ mongoose.connect(
         useUnifiedTopology: true,
         useNewUrlParser: true
     },
-    () => console.log('Connected to mongo')
-);
+    //() => console.log('Connected to mongo')
+).then(() => {
+    console.log('connected to mongo');
+}).catch(err => {
+    console.log('error connecting to mongo:', err);
+});
 
 //middleware
 app.use(cors())

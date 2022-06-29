@@ -3,12 +3,16 @@ const User = require("../models/UserModel");
 const bcrypt = require("bcryptjs");
 const Joi = require("@hapi/joi");
 const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 router.post("/register", async (req, res) => {
     const { error } = registerSchema.validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
     //Check if the user is already in the db
-    const usernameExists = await User.findOne({ username: req.body.username });
+
+    const usernameExists = await User.findOne({ username: req.body.username }); //this is timing out
 
     if (usernameExists) return res.status(400).send("User already exists");
 
@@ -33,29 +37,30 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
     const { error } = loginSchema.validate(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error) return res.status(400).send(JSON.stringify(error.details[0].message));
+
+    const user = await User.findOne({ username: req.body.username });
   
-    const user = await User.findOne({ email: req.body.email });
-  
-    if (!user) return res.status(400).send("Email or password is wrong");
+    if (!user) return res.status(400).send(JSON.stringify("Username or password is wrong"));
   
     const validPass = await bcrypt.compare(req.body.password, user.password);
-    if (!validPass) return res.status(400).send("Email or password is wrong");
+    if (!validPass) return res.status(400).send(JSON.stringify("Username or password is wrong"));
   
+    const auth = user.auth;
     //Create and assign a token
     const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
-    res.header("auth-token", token).send(token);
+    res.send({token: token, auth: auth});
 });
 
 //joi used to validate data
 const registerSchema = Joi.object({
-    name: Joi.string().min(6).required(),
-    email: Joi.string().min(6).required().email(),
+    username: Joi.string().min(6).required(),
     password: Joi.string().min(6).required(),
+    auth: Joi.string().required()
 });
 
 const loginSchema = Joi.object({
-    email: Joi.string().min(6).required().email(),
+    username: Joi.string().min(6).required(),
     password: Joi.string().min(6).required(),
 });
 

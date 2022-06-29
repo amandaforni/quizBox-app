@@ -29,13 +29,13 @@
     </head>
     <body>
         <div class="menu-top">
-            <a class="mng-users" data-auth="admin" >manage users </a>
+            <a class="mng-users" data-auth="admin" style="display:none">manage users </a>
             <a class="logout"> log out</a>
         </div>
         <div class="dashboard">
             <h2>Welcome back to Quizbox!</h2>
-            <div class="dashboard-content">
-                <button class="add-new">Add new quiz</button>
+            <div class="dashboard-content" >
+                <button class="add-new" data-auth="admin">Add new quiz</button>
                 <div class="quiz-grid">
                     <!--test tiles for styling-->
                     <div class="quiz-tile column" id="uuid"> <!--add UUID for each on save-->
@@ -138,13 +138,15 @@
                     <input type="radio" id="student" name="auth-level" value="student" checked>
                     <label for="student">Student</label>
                 </div>
+                <span class="add-user-error"></span>
                 <button id="add-user">Save user</button>
                 <br>
                 <a class="to-dash">Cancel</a>
             </div>
         </div>
-        <div class="user-mng-overlay" style="display: none;">
-            
+        <div class="user-mng-overlay overlay" style="display: none;">
+            <p>User saved successfully!</p>
+            <button>Okay</button>
         </div>
         
         <script src="https://code.jquery.com/jquery-latest.min.js"></script>

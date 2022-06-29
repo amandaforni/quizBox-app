@@ -1,48 +1,117 @@
 /*global $ */
 
-var auth;
+var userAuth;
+
+async function loginUser(userData) {
+    try {
+        const response = await fetch ('http://localhost:5000/login', {
+            method: 'post',
+            body: JSON.stringify(userData),
+            headers: {'Content-Type': 'application/json'}
+        });
+        const data = await response.json();
+
+        if (data.auth) {
+            userAuth = data.auth;
+        } else {
+            $('.login-error').text('Username or password is incorrect');
+            $('.login-box input').css('border','1px solid red');
+            setTimeout(() => {
+                $('.login-error').text('');
+                $('.login-box input').css('border','');
+            }, 5000);
+            return;
+        }
+        window.location.replace(window.location.href.substr(0, (window.location.href.lastIndexOf("/"))) + "/landing.html?auth=" + userAuth);
+    }
+    catch (err) {
+        console.log(err);
+        $('.login-error').text('Something has gone wrong, please try again');
+        setTimeout(() => {
+            $('.login-error').text('');
+        }, 5000);
+    }
+}
+
+$(window).on('load', function() {
+    let queryString = window.location.search;
+    if (queryString) {
+        let urlParam = new URLSearchParams(queryString);
+        let authParam = urlParam.get('auth');
+        userAuth = authParam;
+        loadDashboard(userAuth);
+    }
+});
+
+function loadDashboard(authKey) {
+    console.log(userAuth)
+    if (authKey === 'admin') {
+        $('[data-auth=admin]').show();
+    } else {
+        $('[data-auth=admin]').hide();
+    } 
+}
 
 $('.login-btn').on('click', function() {
-    //This will need to run auth once in - but for now this is fine
-    
-    // if (user has admin) {
-    //     admin auth
-    // } else if (user has assistant) {
-    //     assistant auth
-    // } else {
-    //     basic auth
-    // }
-        
-    window.location.replace(window.location.href.substr(0, (window.location.href.lastIndexOf("/"))) + "/landing.html");
+    let nameVal = $('#qb-username').val();
+    let passVal = $('#qb-password').val();
+
+    let userData = {
+        username: nameVal,
+        password: passVal
+    }
+
+    loginUser(userData).then(() => {
+        loadDashboard();
+    });
 });
 
 $('.logout').on('click', function() {
-    //This will need to remove session cookie - this is fine for now
     window.location.replace(window.location.href.substr(0, (window.location.href.lastIndexOf("/"))) + "/index.html");
 });
 
 /*Add users*/
 
-$('#add-user').on('click', function() {
-    let nameVal = $('#username').val();
-    let passVal = $('#password').val();
-    let authLevel = $('[name=auth-level]').val();
+async function registerUser(userData) {
+    try {
+        const response = await fetch ('http://localhost:5000/register', {
+            method: 'post',
+            body: JSON.stringify(userData),
+            headers: {'Content-Type': 'application/json'}
+        });
+        const data = await response.json();
+        console.log(data);
 
-    console.log(nameVal + '-' + passVal + '-' + authLevel)
+        $('.user-mng-overlay').fadeIn();
+    }
+    catch (err) {
+        $('.add-user-error').text('Something has gone wrong, please try again');
+        setTimeout(() => {
+            $('.add-user-error').text('');
+        }, 5000);
+        console.log(err)
+    }
+}
+
+$('#add-user').on('click', function() {
+    let nameVal =  $('#username').val();
+    let passVal = $('#password').val();
+    let authLevel = $('[name=auth-level]:checked').val();
 
     let userData = {
-        "username": nameVal,
-        "password": passVal,
-        "auth": authLevel
+        username: nameVal,
+        password: passVal,
+        auth: authLevel
     }
-    //post to register 
-    $.post("http://localhost:5000/register", userData, function() {
-        console.log(data)
-    });
 
-    //on success
-    $('#username, #password').val('');
-    $('[value=student]').prop('checked', true);
+    registerUser(userData).then(() => {
+        $('#username, #password').val('');
+        $('[value=student]').prop('checked', true);
+    });
+});
+
+$('.user-mng-overlay button').on('click', function() {
+    $(this).parent().fadeOut();
 });
 
 /*Quizzes functionality*/ 
