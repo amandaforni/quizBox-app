@@ -498,7 +498,7 @@ $('.remove-question').on('click', function() {
 $('.add-question').on('click', function() {
     let currentQuizLength = $(this).parent().children('.quiz-questions').children('.question').last().attr('data-number');
     let newLength = parseInt(currentQuizLength) + 1;
-    console.log(newLength)
+    
     if (newLength > 1) {
         $('.remove-question').show();
     }
