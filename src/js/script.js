@@ -128,6 +128,7 @@ $('.reload').on('click', function() {
 $('.add-new').on('click', function() {
     $('.question').not(':first').remove();
     $('.quiz-editor input').val('');
+    $('.quiz-editor h2').text('Add a new quiz');
     $('.option').not('.def-opt').remove();
     $('#save-quiz').attr('data-id', 'new');
     $('.1-add').show();
@@ -271,6 +272,7 @@ $(document).on('click', '.open-quiz', function() {
 
 $(document).on('click', '.edit-quiz', function() {
     $('.question').not(':first').remove();
+    $('.quiz-editor h2').text('Edit quiz');
     var quizTitle = $(this).parent().parent().children('.tile-info').text();
     var quizId = $(this).parent().parent().attr('data-id');
     $('#save-quiz').attr('data-id', quizId);
@@ -496,8 +498,8 @@ $('.remove-question').on('click', function() {
 $('.add-question').on('click', function() {
     let currentQuizLength = $(this).parent().children('.quiz-questions').children('.question').last().attr('data-number');
     let newLength = parseInt(currentQuizLength) + 1;
-
-    if (newLength> 1) {
+    console.log(newLength)
+    if (newLength > 1) {
         $('.remove-question').show();
     }
     
