@@ -8,6 +8,18 @@ The Quiz Manager is a basic web-page app which uses Node.js, Express, and a Mong
 
 ## Getting Started
 
+### Dependencies
+
+* bcrypt.js - Used to hash password information
+* cors - Used to prevent CORS errors in the browser
+* dotenv - Used to interact with .env file
+* express - Used to help with routing
+* jsonwebtoken - Used to help with authentication setup
+* node-fetch - Used to help with route calls
+* mongoose - Used to interact with Mongo databases
+* @hapi/joi - Used for validating data
+* nodemon - Used to keep program running, allows developer to keep local server running without having to restart on save
+
 ### Executing program
 
 * Run 
