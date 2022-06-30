@@ -129,6 +129,13 @@ body {
     justify-content: flex-end;
 }
 
+.main-page-logo {
+    position: fixed;
+    top: 0;
+    left: 1rem;
+    height: 2.6rem;
+}
+
 .menu-top button {
     width: 8rem;
     border-radius: 0px;
@@ -170,6 +177,7 @@ body {
 
 .add-new {
     float: right;
+    margin-left: 1rem;
 }
 
 .reload { /*Remove when removing this button after testing*/
@@ -188,7 +196,7 @@ body {
     border: 1px solid transparent;
     padding: 2rem 1rem;
     margin: 2rem;
-    max-width: 18rem;
+    width: 18%;
 }
 
 .quiz-tile:hover {
@@ -252,7 +260,7 @@ body {
     width: 34rem
 }
 
-.add-question {
+.add-question, .remove-question {
     width: 12rem;
 }
 
@@ -264,3 +272,60 @@ body {
     margin-top: 3rem;
 }
 
+/*Student view*/
+.student-test {
+    background-color: var(--background-light);
+    color: var(--color-main);
+    min-height: 35rem;
+}
+
+.quiz-q-preview span {
+    margin: 1rem;
+}
+
+/*Print view*/
+.quiz-assistant-preview {
+    background-color: var(--background-light);
+    color: black;
+    margin-top: 1rem;
+    padding: 3rem;
+}
+
+.quiz-assistant-preview .title-row {
+    float: left;
+}
+
+.question-block, .print-answer-list {
+    align-items: flex-start;
+}
+
+.print-answer-list {
+    margin: 0.5rem 0rem 1rem 1rem;
+}
+
+.print-answer-list span {
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
+}
+
+.print-line {
+    border: none;
+    border-bottom: 1px solid black;
+    border-radius: 0px;
+    width: 36rem;
+    margin-right: 5rem;
+}
+
+[name=print-date] {
+    width: 24rem
+}
+
+.print-quiz-name {
+    max-width: 44rem; 
+    overflow-wrap: break-word;
+}
+
+.question-block {
+    max-width: 60rem;
+    overflow-wrap: break-word;
+}

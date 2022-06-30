@@ -1,5 +1,4 @@
 /*global $ */
-
 var userAuth;
 
 async function loginUser(userData) {
@@ -122,13 +121,45 @@ $('.close').on('click', function() {
 
 /*Quizzes functionality*/ 
 
+$('.reload').on('click', function() {
+    loadQuizzes();
+});
+
+$('.add-new').on('click', function() {
+    $('.question').not(':first').remove();
+    $('.quiz-editor input').val('');
+    $('.option').not('.def-opt').remove();
+    $('#save-quiz').attr('data-id', 'new');
+    $('.1-add').show();
+    $('.1-div, .1-del').hide();
+    $('.dashboard').hide();
+    $('.edit-quiz-page').show();
+});
+
+$('.cancel').on('click', function() {
+     $('.confirm-overlay').fadeIn();
+});
+
+$('.confirm-overlay button').on('click', function() {
+   if ($(this).hasClass('yes-cancel')) {
+        $(this).parent().hide();
+        $('.dashboard').show();
+        $('.edit-quiz-page').hide();
+   } else {
+       $(this).parent().fadeOut();
+   }
+});
+
 async function loadQuizzes() {
     $('.quiz-grid').empty();
 
     try {
         const response = await fetch('http://localhost:5000/quiz/getQuizzes')
         const data = await response.json();
-        console.log(data);
+
+        if (data.length == 0) {
+            $('.quiz-grid').text("Oh no, no quizzes have been made yet!");
+        }
 
         for (let i = 0; i < data.length; i++) {
             let quizTile = document.createElement('div');
@@ -142,8 +173,10 @@ async function loadQuizzes() {
             openButton.classList = 'open-quiz';
             $(openButton).text('open');
 
+            let quizData = data[i].questions;
+
             if (userAuth == 'admin') {
-                $(quizTile).attr('data-info', JSON.stringify(data[i].questions));
+                $(quizTile).attr('data-info', JSON.stringify(quizData));
                 let editButton = document.createElement('button');
                 editButton.classList = 'edit-quiz';
                 $(editButton).text('edit');
@@ -152,10 +185,16 @@ async function loadQuizzes() {
                 $(deleteButton).text('delete');
                 buttonDiv.append(editButton, openButton, deleteButton);
             } else if (userAuth == 'assistant') {
-                $(quizTile).attr('data-info', JSON.stringify(data[i].questions));
+                $(quizTile).attr('data-info', JSON.stringify(quizData));
                 buttonDiv.append(openButton);
             } else {
-                openButton.classList = 'student-open';
+                let questionsOnly = [];
+                for (j = 0; j < quizData.length; j ++) {
+                    questionsOnly.push(quizData[j].question);
+                }
+                
+                $(openButton).addClass('student-open');
+                $(quizTile).attr('data-info', JSON.stringify(questionsOnly));
                 buttonDiv.append(openButton);
             }
             
@@ -164,51 +203,205 @@ async function loadQuizzes() {
         }
     }
     catch (err) {
+        $('.quiz-grid').text('Something has gone wrong! Please contact WebbiSkools helpdesk.')
         console.log('Get quizzes error:' + err)
     }
 }
 
 $(document).on('click', '.open-quiz', function() {
-    if ($(this).hasClass('.student-open')) {
-        console.log('student opening')
+    var quizTitle = $(this).parent().parent().children('.tile-info').text();
+    var quizData = JSON.parse($(this).parent().parent().attr('data-info'));
+
+    if ($(this).hasClass('student-open')) {
+        $('.student-quiz-name').text('');
+        $('.quiz-q-preview').empty();
+
+        for (let i = 0; i < quizData.length; i ++) {
+            let number = i + 1;
+            let questionSpan = document.createElement('span');
+            questionSpan.classList = 'student-preview q-' + number;
+            $(questionSpan).text(number + '. ' + quizData[i]);
+            $('.quiz-q-preview').append(questionSpan);
+        }
+
+        $('.student-quiz-name').text(quizTitle);
+        $('.dashboard').hide();
+        $('.quiz-student-preview').show();
+        return;
     } else {
-        let quizData = $(this).parent().parent().attr('data-info');
+        $('.print-quiz-name').text('');
+        $('.print-questions').empty();
+
+        for (let i = 0; i < quizData.length; i ++) {
+            var number = i + 1;
+            let questionDiv = document.createElement('div');
+            questionDiv.classList = 'question-block column';
+            let questionSpan = document.createElement('span');
+            $(questionSpan).text(number + '. ' + quizData[i].question);
+            let answersDiv = document.createElement('div');
+            answersDiv.classList = 'print-answer-list column';
+
+            for (let j = 0; j < quizData[i].options.length; j ++ ) {
+                let answerSpan = document.createElement('span');
+                if (j == 0) {
+                    $(answerSpan).text('a. ' + quizData[i].options[j]);
+                }
+                if (j == 1) {
+                    $(answerSpan).text('b. ' + quizData[i].options[j]);
+                }
+                if (j == 2) {
+                    $(answerSpan).text('c. ' + quizData[i].options[j]);
+                }
+                if (j == 3) {
+                    $(answerSpan).text('d. ' + quizData[i].options[j]);
+                }
+
+                $(answersDiv).append(answerSpan);
+            }
+
+            $(questionDiv).append(questionSpan, answersDiv);
+            $('.print-questions').append(questionDiv);
+        }
         
-
-        console.log(quizData);
+        $('.print-quiz-name').text(quizTitle);
+        $('.dashboard').hide();
+        $('.quiz-assistant-preview').show();
     }
 });
 
-$('.reload').on('click', function() {
-    loadQuizzes();
-});
+$(document).on('click', '.edit-quiz', function() {
+    $('.question').not(':first').remove();
+    var quizTitle = $(this).parent().parent().children('.tile-info').text();
+    var quizId = $(this).parent().parent().attr('data-id');
+    $('#save-quiz').attr('data-id', quizId);
+    var quizData = JSON.parse($(this).parent().parent().attr('data-info'));
+    for (let i = 0; i < quizData.length; i ++) {
+        var number = i + 1;
 
-async function deleteQuiz(quizId) {
-    let id = {quizId}
+        if (number == 1) {
+            $('#q-1').val(quizData[i].question);
 
-    try {
-        const response = await fetch('http://localhost:5000/quiz/deleteQuiz', {
-            method: 'post',
-            body: JSON.stringify(id),
-            headers: {'Content-Type': 'application/json'}
-        });
+            for (let j = 0; j < quizData[i].options.length; j ++) {
+                if (j == 0) {
+                    $('#1-a').val(quizData[i].options[j]);
+                }
+                if (j == 1) {
+                    $('#1-b').val(quizData[i].options[j]);
 
-        const data = await response.json();
-        console.log(data);
+                    $('.1-div, .1-del').attr('style', 'display: none;');
+                    $('.1-add').attr('style', 'display: inline;');
+                }
+                if (j == 2) {
+                    var opt1 = document.createElement('div');
+                    opt1.classList = 'option';
+                    var label1 = document.createElement('label');
+                    var input1 = document.createElement('input');
+                    $(label1).attr('for', number + '-c');
+                    $(label1).text('c.');
+                    $(input1).attr({'type':'text', 'class':'quiz-input answer-input', 'name': number + '-c', 'id': number + '-c'});
+                    $(input1).val(quizData[i].options[j]);
 
-        //loadQuizzes();
+                    $('.1-div, .1-del, .1-add').attr('style', 'display: inline;');
+                }
+                if (j == 3) {
+                    var opt1 = document.createElement('div');
+                    opt1.classList = 'option';
+                    var label1 = document.createElement('label');
+                    var input1 = document.createElement('input');
+                    $(label1).attr('for', number + '-d');
+                    $(label1).text('d.');
+                    $(input1).attr({'type':'text', 'class':'quiz-input answer-input', 'name': number + '-d', 'id': number + '-d'});
+                    $(input1).val(quizData[i].options[j]);
+
+                    $('.1-del').attr('style', 'display: inline;');
+                    $('.1-div, .1-add').attr('style', 'display: none;');
+                }
+
+                $(opt1).append(label1, input1);
+                $('.quiz-answers-1').append(opt1);
+            }
+        } else {
+            let questionWrap = document.createElement('div');
+            $(questionWrap).attr({'class':'question', 'data-number': number});
+            let qLabel = document.createElement('label');
+            $(qLabel).attr('for','q-' + number);
+            $(qLabel).text(number + '.');
+            let qInput = document.createElement('input');
+            $(qInput).attr({'type':'text','class':'quiz-input question-input', 'name': 'q-' + number, 'id':'q-' + number});
+            $(qInput).val(quizData[i].question);
+
+            let answersList = document.createElement('div');
+            $(answersList).attr({'class':'answers-list','data-number':number});
+            let inputList = document.createElement('div');
+            inputList.classList = 'quiz-answers-' + number;
+            
+            let addOption = document.createElement('a');
+            addOption.classList = 'add-option';
+            $(addOption).text('+ add another option');
+            let divider = document.createElement('span');
+            $(divider).attr('class','divider');
+            $(divider).text(' | ');
+            let removeOption = document.createElement('a');
+            $(removeOption).attr('class','remove-option');
+            $(removeOption).text('delete last answer');
+
+            for (let j = 0; j < quizData[i].options.length; j ++) {
+                var opt1 = document.createElement('div');
+                opt1.classList = 'option';
+                var label1 = document.createElement('label');
+                var input1 = document.createElement('input');
+
+                if (j == 0) {
+                    $(label1).attr('for', number + '-a');
+                    $(label1).text('a.');
+                    $(input1).attr({'type':'text', 'class':'quiz-input answer-input', 'name': number + '-a', 'id': number + '-a'});
+                    $(input1).val(quizData[i].options[j]);
+                }
+                if (j == 1) {
+                    $(label1).attr('for', number + '-b');
+                    $(label1).text('b.');
+                    $(input1).attr({'type':'text', 'class':'quiz-input answer-input', 'name': number + '-b', 'id': number + '-b'});
+                    $(input1).val(quizData[i].options[j]);
+
+                    $(divider).attr('style', 'display: none;');
+                    $(removeOption).attr('style', 'display: none;');
+                    $(addOption).attr('style', 'display: inline;');
+                }
+                if (j == 2) {
+                    $(label1).attr('for', number + '-c');
+                    $(label1).text('c.');
+                    $(input1).attr({'type':'text', 'class':'quiz-input answer-input', 'name': number + '-c', 'id': number + '-c'});
+                    $(input1).val(quizData[i].options[j]);
+
+                    $(divider).attr('style', 'display: inline;');
+                    $(removeOption).attr('style', 'display: inline;');
+                    $(addOption).attr('style', 'display: inline;');
+                }
+                if (j == 3) {
+                    $(label1).attr('for', number + '-d');
+                    $(label1).text('d.');
+                    $(input1).attr({'type':'text', 'class':'quiz-input answer-input', 'name': number + '-d', 'id': number + '-d'});
+                    $(input1).val(quizData[i].options[j]);
+
+                    $(removeOption).attr('style', 'display: inline;');
+                    $(divider).attr('style', 'display: none;');
+                    $(addOption).attr('style', 'display: none;');
+                }
+
+                $(opt1).append(label1, input1);
+                inputList.append(opt1);
+            }
+
+            $(answersList).append(inputList, addOption, divider, removeOption);
+            $(questionWrap).append(qLabel,qInput, answersList);
+            $('.quiz-questions').append(questionWrap);
+        }
     }
-    catch (err) {
-        console.log('delete quiz error:' + err); // this is still erroring for some reason but is working? come back to
-    }
 
-    loadQuizzes();
-}
+    $('#quiz-title').val(quizTitle);
 
-$(document).on('click', '.delete-quiz', function() {
-    let quizId = $(this).parent().parent().attr('data-id');
-
-    deleteQuiz(quizId);
+    $('.dashboard').hide();
+    $('.edit-quiz-page').show();
 });
 
 async function saveQuiz(quizData) {
@@ -219,11 +412,27 @@ async function saveQuiz(quizData) {
             headers: {'Content-Type': 'application/json'}
         });
         const data = await response.json();
-        
+
         $('.quiz-save-overlay').show();
     }
     catch (err) {
         console.log('save quiz error: ' + err);
+    }
+}
+
+async function updateQuiz(quizData) {
+    try {
+        const response = await fetch('http://localhost:5000/quiz/updateQuiz', {
+            method: 'post',
+            body: JSON.stringify(quizData),
+            headers: {'Content-Type': 'application/json'}
+        });
+        const data = await response.json();
+
+        $('.quiz-save-overlay').show();
+    }
+    catch (err) {
+        console.log('update quiz error: ' + err);
     }
 }
 
@@ -256,90 +465,41 @@ $('#save-quiz').on('click', function() {
             optionsList.push(optionD);
         }
 
-        
         questionMap['question'] = quizQuestion;
         questionMap['options'] = optionsList;
         questionList.push(questionMap);
     });
 
+    if ($(this).attr('data-id') !== 'new') {
+        fullQuiz['quizId'] = $(this).attr('data-id');
+    }
+
     fullQuiz['title'] = quizTitle;
     fullQuiz['questions'] = questionList;
-    saveQuiz(fullQuiz);
-});
 
-$('.add-new').on('click', function() {
-    $('.dashboard').hide();
-    $('.edit-quiz-page').show();
-});
-
-$('.cancel').on('click', function() {
-     $('.confirm-overlay').fadeIn();
-});
-
-$('.confirm-overlay button').on('click', function() {
-   if ($(this).hasClass('yes-cancel')) {
-        $(this).parent().hide();
-        $('.dashboard').show();
-        $('.edit-quiz-page').hide();
-   } else {
-       $(this).parent().fadeOut();
-   }
-});
-
-$(document).on('click', '.add-option', function() {
-    let optionsDiv = $(this).parent().children();
-    let options = $(optionsDiv).children().length;
-    let number = $(this).parent().attr('data-number');
-    let letter;
-    
-    if (options == 2) {
-        letter = 'c';
-        $(optionsDiv).parent().children('.divider, .remove-option').show();
-    } else if (options == 3) {
-        letter = 'd';
-        $(optionsDiv).parent().children('.divider, .add-option').hide();
-    } else if (options > 3) {
-        $(optionsDiv).parent().children('.divider, .remove-option').show();
+    if ($(this).attr('data-id') !== 'new') {
+        updateQuiz(fullQuiz);
         return;
     } else {
-        alert('Quiz questions must have at least 2 answers'); //add feedback for users for 2 answers min
-        return;
+        saveQuiz(fullQuiz);
     }
-    
-    let answerWrap = document.createElement('div');
-    answerWrap.classList = 'option';
-    let answerLabel = document.createElement('label');
-    $(answerLabel).attr('for', number + '-' + letter);
-    $(answerLabel).text(letter + '.');
-    let answerInput = document.createElement('input');
-    $(answerInput).attr({'type':'text', 'class':'quiz-input answer-input', 'name':number + '-' + letter, 'id': number + '-' + letter});
-    $(answerWrap).append(answerLabel, answerInput);
-    $('.quiz-answers-' + number).append(answerWrap);
 });
 
-$('.remove-option').on('click', function() {
-    let number = $(this).parent().attr('data-number');
-    let optionsDiv = $(this).parent().children('.quiz-answers-' + number);
-    let options = $(optionsDiv).children().length;
-    
-    console.log(options)
-
-    if (options == 3) {
-        $(optionsDiv).parent().children('.add-option').show();
-        $(optionsDiv).parent().children('.divider, .remove-option').hide();
-    } else if (options == 4) {
-        $(optionsDiv).parent().children('.divider, .add-option').show();
-        $(optionsDiv).parent().children('.remove-option').show();
-    } else {
-        return;
+$('.remove-question').on('click', function() {
+    let currentQuizLength = parseInt($(this).parent().children('.quiz-questions').children('.question').last().attr('data-number'));
+    if (currentQuizLength == 2) {
+        $('.remove-question').hide();
     }
-
-    $(optionsDiv).children().last().remove();
+    $('.quiz-questions').children('.question').last().remove();
 });
 
 $('.add-question').on('click', function() {
     let currentQuizLength = $(this).parent().children('.quiz-questions').children('.question').last().attr('data-number');
     let newLength = parseInt(currentQuizLength) + 1;
+
+    if (newLength> 1) {
+        $('.remove-question').show();
+    }
     
     let questionWrap = document.createElement('div');
     $(questionWrap).attr({'class':'question', 'data-number': newLength});
@@ -374,10 +534,85 @@ $('.add-question').on('click', function() {
     let addOption = document.createElement('a');
     addOption.classList = 'add-option';
     $(addOption).text('+ add another option');
-    $(answersList).append(inputList, addOption);
+    let divider = document.createElement('span');
+    $(divider).attr({'class':'divider', 'style':'display:none;'})
+    $(divider).text(' | ');
+    let removeOption = document.createElement('a');
+    $(removeOption).attr({'class':'remove-option', 'style':'display:none;'})
+    $(removeOption).text('delete last answer');
+    $(answersList).append(inputList, addOption, divider, removeOption);
     
     $(questionWrap).append(qLabel,qInput, answersList);
     $('.quiz-questions').append(questionWrap);
+});
+
+$(document).on('click', '.add-option', function() {
+    let optionsDiv = $(this).parent().children();
+    let options = $(optionsDiv).children().length;
+    let number = $(this).parent().attr('data-number');
+    let letter;
+
+    if (options == 2) {
+        letter = 'c';
+        $(optionsDiv).parent().children('.divider, .remove-option').show();
+    } else if (options == 3) {
+        letter = 'd';
+        $(optionsDiv).parent().children('.divider, .add-option').hide();
+        $(optionsDiv).parent().children('.remove-option').show();
+    } else {
+        return;
+    }
+    
+    let answerWrap = document.createElement('div');
+    answerWrap.classList = 'option';
+    let answerLabel = document.createElement('label');
+    $(answerLabel).attr('for', number + '-' + letter);
+    $(answerLabel).text(letter + '.');
+    let answerInput = document.createElement('input');
+    $(answerInput).attr({'type':'text', 'class':'quiz-input answer-input', 'name':number + '-' + letter, 'id': number + '-' + letter});
+    $(answerWrap).append(answerLabel, answerInput);
+    $('.quiz-answers-' + number).append(answerWrap);
+});
+
+$(document).on('click', '.remove-option', function() {
+    let number = $(this).parent().attr('data-number');
+    let optionsDiv = $(this).parent().children('.quiz-answers-' + number);
+    let options = $(optionsDiv).children().length;
+
+    if (options == 3) {
+        $(optionsDiv).parent().children('.add-option').show();
+        $(optionsDiv).parent().children('.divider, .remove-option').hide();
+    } else if (options == 4) {
+        $(optionsDiv).parent().children('.divider, .add-option').show();
+        $(optionsDiv).parent().children('.remove-option').show();
+    } else {
+        return;
+    }
+
+    $(optionsDiv).children().last().remove();
+});
+
+async function deleteQuiz(quizId) {
+    let id = {quizId}
+
+    try {
+        const response = await fetch('http://localhost:5000/quiz/deleteQuiz', {
+            method: 'post',
+            body: JSON.stringify(id),
+            headers: {'Content-Type': 'application/json'}
+        });
+        const data = await response.json();
+        loadQuizzes();
+    }
+    catch (err) {
+        console.log('delete quiz error:' + err); 
+    }
+}
+
+$(document).on('click', '.delete-quiz', function() {
+    let quizId = $(this).parent().parent().attr('data-id');
+
+    deleteQuiz(quizId);
 });
 
 /*For assistant view*/

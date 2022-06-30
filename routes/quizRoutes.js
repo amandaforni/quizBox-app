@@ -5,12 +5,10 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 router.post("/saveQuiz", async (req, res) => {
-    //Check if the quiz is already in the db
     const quizExists = await Quiz.findOne({ title: req.body.title });
 
     if (quizExists) return res.status(400).send("Quiz name already exists");
 
-    //create new quiz
     const quiz = new Quiz({
         title: req.body.title,
         questions: req.body.questions
@@ -24,10 +22,30 @@ router.post("/saveQuiz", async (req, res) => {
     }
 });
 
+router.post("/updateQuiz", async (req, res) => {
+    let newData = {
+        title: req.body.title,
+        questions: req.body.questions
+    }
+
+    Quiz.findOneAndUpdate({_id: req.body.quizId}, {"$set": newData}).exec( function(err, result) {
+        if (err) {
+            console.log(err)
+            res.status(400).send(err);
+        } else {
+            res.json(result);
+        }
+    });
+});
+
 router.post('/deleteQuiz', async(req, res) => {
-    const deleteQuiz = await Quiz.findOneAndDelete({ _id : req.body.quizId });
-    
-    if (deleteQuiz) return res.status(200);
+    Quiz.findOneAndDelete({ _id : req.body.quizId }, function (err, result) {
+        if (err) {
+            res.status(400).send(err);
+        } else {
+            res.json(result);
+        }
+    });
 });
 
 router.get('/getQuizzes', async(req, res) => {

@@ -10,17 +10,13 @@ dotenv.config();
 router.post("/register", async (req, res) => {
     const { error } = registerSchema.validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
-    //Check if the user is already in the db
 
     const usernameExists = await User.findOne({ username: req.body.username });
-
     if (usernameExists) return res.status(400).send("User already exists");
 
-    //hash passwords
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(req.body.password, salt);
 
-    //create new user
     const user = new User({
         username: req.body.username,
         password: hashPassword,
@@ -47,7 +43,6 @@ router.post("/login", async (req, res) => {
     if (!validPass) return res.status(400).send(JSON.stringify("Username or password is wrong"));
 
     const auth = user.auth;
-    //Create and assign a token
     const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
     res.send({ token: token, auth: auth });
 });

@@ -28,6 +28,7 @@
     </head>
     <body>
         <div class="menu-top">
+            <img alt="Webbiskools logo" class="main-page-logo" src="img/WS-logo-large.png">
             <button class="home to-dash">home</button>
             <button class="mng-users" data-auth="admin" style="display:none">manage users</button>
             <button class="logout">log out</button>
@@ -57,26 +58,27 @@
                         
                         <div class="answers-list" data-number="1">
                             <div class="quiz-answers-1">
-                                <div class="option">
+                                <div class="option def-opt">
                                     <label for="1-a">a.</label>
                                     <input type="text" class="quiz-input answer-input"  name="1-a" id="1-a" /> 
                                 </div>
                                 
-                                <div class="option">
+                                <div class="option def-opt">
                                     <label for="1-b">b.</label>
                                     <input type="text" class="quiz-input answer-input"  name="1-b" id="1-b" />
                                 </div>
                             </div>
                             
-                            <a class="add-option">+ add another answer</a>
-                            <span class="divider" style="display: none;"> | </span>
-                            <a class="remove-option" style="display: none;">delete last answer</a>
+                            <a class="add-option 1-add">+ add another answer</a>
+                            <span class="divider 1-div" style="display: none;"> | </span>
+                            <a class="remove-option 1-del" style="display: none;">delete last answer</a>
                         </div>
                     </div>
                 </div>
                 <button class="add-question">+ add another question</button>
+                <button class="remove-question" style="display: none">remove last question</button>
                 <div class="quiz-actions column">
-                    <button id="save-quiz">Save quiz</button>
+                    <button id="save-quiz" data-id="new">Save quiz</button>
                     <br>
                     <a class="cancel">Cancel</a>
                 </div>
@@ -92,8 +94,8 @@
             <button class="no-cancel">Stay on this page</button>
         </div>
         
-        <div class="quiz-assistant-preview" style="display: none;">
-            <div class="print-info">
+        <div class="quiz-assistant-preview content-page" style="display: none;">
+            <div class="print-info overlay">
                 <p>Please print using browser</p>
                 <button class="close">Okay</button>
             </div>
@@ -104,15 +106,21 @@
                 <label for="print-date">Date: </label>
                 <input type="text" class="print-line"  name="print-date" /> 
             </div>
-            <div class="print-questions">
-                
+            <br>
+            <div>
+                <h3 class="print-quiz-name"></h3>
+                <div class="print-questions">
+                    
+                </div>
             </div>
         </div>
         <div class="quiz-student-preview content-page" style="display: none;">
             <h2>Welcome to the study zone!</h2>
-            <h3 class="student-quiz-name"></h3>
-            <div class="quiz-q-preview">
-                
+            <div class="student-test column">
+                <h3 class="student-quiz-name"></h3>
+                <div class="quiz-q-preview column">
+                    
+                </div>
             </div>
         </div>
         
