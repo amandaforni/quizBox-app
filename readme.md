@@ -4,7 +4,7 @@ BCS Level 4 Software Developer Synoptic Project.
 
 ## Description
 
-The Quiz Manager is a basic web-page app which uses Node.js, Express, and a MongoDB to manage quiz creation and access based on different authentication levels. Admin level users are able to create new users, create/edit/delete quizzes, and view the full quiz including answers. Assistant level users are able to view the full quiz including answers. Student level users are only able to view questions.
+The Quiz Manager is a basic web-page app which uses Node.js, Express, and a MongoDB to manage quiz creation and access based on different authentication levels. Admin level users are able to create new users, create/edit/delete quizzes, and view the full quiz including answers. Assistant level users are able to view the full quiz including answers. Student level users are only able to view questions. Necessary files have been included in submission to BCS however some files have not been uploaded to the git repo for security reasons, therefore this project will not run if just cloned. 
 
 ## Getting Started
 
